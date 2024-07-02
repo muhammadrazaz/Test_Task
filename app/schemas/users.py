@@ -8,11 +8,11 @@ import re
 
 class UserBase(BaseModel):
     
-    first_name:  Annotated[str,StringConstraints(min_length=2,max_length=25,strip_whitespace=True,to_upper=True)]
-    last_name:  Annotated[str,StringConstraints(min_length=2,max_length=25,strip_whitespace=True,to_upper=True)]
+    first_name:  Annotated[str,StringConstraints(min_length=2,max_length=25,strip_whitespace=True)]
+    last_name:  Annotated[str,StringConstraints(min_length=2,max_length=25,strip_whitespace=True)]
    
     email: EmailStr
-    phone_no: Annotated[str,StringConstraints(min_length=12,max_length=13)]
+    phone_no: Annotated[str,StringConstraints(min_length=8,max_length=15)] |None=None
     
 
     @field_validator('first_name')
@@ -28,6 +28,7 @@ class UserBase(BaseModel):
     def check_last_name(cls,last_name):
         name_regex = r'^[A-Za-z]+$'
         
+        
         if not re.fullmatch(name_regex,last_name):
             raise ValueError("last name must be string")
         
@@ -38,30 +39,24 @@ class UserBase(BaseModel):
     @field_validator('phone_no')
     def check_phone_no(cls,phone_no):
         phone_regex = r'^^\+\d{1,3}\d{4,14}(?:x.+)?$'
-        
-        if not re.fullmatch(phone_regex,phone_no):
+        if phone_no and not re.fullmatch(phone_regex,phone_no):
             raise ValueError("Phone number must contain valid country code and number e.g +xxxxxxxxxxxx")
         return phone_no
 
 class UserCreate(UserBase):
-    password : str = constr(min_length=8,
-                            #  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$"
-                             )
+    password : Annotated[str,StringConstraints(min_length=8)]
     confirm_password : str
-    
+     #  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$"
 
-    @field_validator('password')
-    def match_password(cls,password:str,info: ValidationInfo):
+    @field_validator("confirm_password")
+    def passwords_match(cls, confirm_password: str, info: ValidationInfo) -> str:
         
-        if 'confirem_password' in info.data and password != info.data['confirm_password']:
-            raise ValueError('Password do not match')
-        return password
+        if "password" in info.data and confirm_password != info.data["password"]:
+            raise ValueError("passwords do not match")
+        return confirm_password
     
 
-class UserUpdate(UserBase):
-    del UserBase.__annotations__['email']
-    # del UserCreate.__annotations__['confirm_password']
-    # pass
+
 
 
 class PasswordUpdate(BaseModel):
@@ -70,12 +65,12 @@ class PasswordUpdate(BaseModel):
     old_password : str 
     
 
-    @field_validator('password')
-    def match_password(cls,password:str,info: ValidationInfo):
+    @field_validator("confirm_password")
+    def passwords_match(cls, confirm_password: str, info: ValidationInfo) -> str:
         
-        if 'confirem_password' in info.data and password != info.data['confirm_password']:
-            raise ValueError('Password do not match')
-        return password
+        if "password" in info.data and confirm_password != info.data["password"]:
+            raise ValueError("passwords do not match")
+        return confirm_password
    
     
 
@@ -92,6 +87,13 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token :str
     token_type:str
+
+    
+
+class UserUpdate(UserBase):
+    del UserBase.__annotations__['email']
+    # del UserCreate.__annotations__['confirm_password']
+    # pass
     
     
 

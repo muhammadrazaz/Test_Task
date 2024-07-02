@@ -9,5 +9,5 @@ class User(Base):
     last_name = Column(String(length=25), index=True)
     email = Column(String(length=100), unique=True, index=True)
     hashed_password = Column(String(length=255))
-    phone_no = Column(String(length=13))
-    profile_picture = Column(String(length=100))
+    phone_no = Column(String(length=15),nullable=True)
+    profile_picture = Column(String(length=100),nullable=True)

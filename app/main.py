@@ -4,7 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal,engine,Base
 from app.routers import users
 
+
 Base.metadata.create_all(bind=engine)
+
+
 
 
 

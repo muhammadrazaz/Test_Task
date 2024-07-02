@@ -45,7 +45,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def update_password(password,user,db):
-    print(password,'====================')
+    
 
     user.hashed_password = utils.hash_pass(password)
 
@@ -109,3 +109,6 @@ def delete_phone_number(db: Session, user_id: int):
         db.commit()
         db.refresh(user)
     return user
+
+
+
