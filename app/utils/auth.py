@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException,Depends,status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer,OAuth2AuthorizationCodeBearer
-from app import models,routers,schemas
+from app import models,routers,schemas,utils
 from datetime import datetime,timedelta
 from jose import jwt ,JWTError
 from sqlalchemy.orm import Session
@@ -24,16 +24,19 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 def authenticate_user(email:str,password:str,db):
     user  = db.query(models.User).filter(models.User.email ==email).first()
-    print(user)
+    
  
     if not user:
         return False
     
+    print(password)
+    
     if not pwd_context.verify(password,user.hashed_password):
         return False
     
-    return user
     
+    
+    return user
 
 def get_access_token(email:str,user_id:int):
     encode = {'sub':email,"id":user_id}

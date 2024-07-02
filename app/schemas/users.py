@@ -5,6 +5,7 @@ import re
 
 
 
+
 class UserBase(BaseModel):
     
     first_name:  Annotated[str,StringConstraints(min_length=2,max_length=25,strip_whitespace=True,to_upper=True)]
@@ -57,10 +58,24 @@ class UserCreate(UserBase):
         return password
     
 
-class UserUpdate(UserCreate):
+class UserUpdate(UserBase):
     del UserBase.__annotations__['email']
     # del UserCreate.__annotations__['confirm_password']
     # pass
+
+
+class PasswordUpdate(BaseModel):
+    password : str = constr(min_length=8)
+    confirm_password : str
+    old_password : str 
+    
+
+    @field_validator('password')
+    def match_password(cls,password:str,info: ValidationInfo):
+        
+        if 'confirem_password' in info.data and password != info.data['confirm_password']:
+            raise ValueError('Password do not match')
+        return password
    
     
 
@@ -71,7 +86,7 @@ class UserResponse(UserBase):
         orm_mode = True
     
 class UserLogin(BaseModel):
-    username: EmailStr
+    email: EmailStr
     password : str
 
 class Token(BaseModel):
